@@ -45,4 +45,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.2.3")
     implementation("androidx.camera:camera-view:1.2.3")
     implementation("androidx.camera:camera-extensions:1.2.3")
+
+    //Request HTTP
+    implementation("com.google.android.gms:play-services-cronet:18.0.1")
 }

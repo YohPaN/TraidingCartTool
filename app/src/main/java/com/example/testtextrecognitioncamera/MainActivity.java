@@ -32,12 +32,18 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
+import org.chromium.net.CronetEngine;
+import org.chromium.net.UrlRequest;
+
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity{
 
     PreviewView previewView;
-
+    CronetEngine.Builder cronetEngineBuilder;
+    Executor executor = Executors.newSingleThreadExecutor();
 
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
@@ -56,6 +62,18 @@ public class MainActivity extends AppCompatActivity{
         imageAnalyzer();
 
         previewView = findViewById(R.id.cameraPreview);
+
+        cronetEngineBuilder = new CronetEngine.Builder(this);
+        CronetEngine cronetEngine = cronetEngineBuilder.build();
+
+        UrlRequest.Builder urlRequestBuilder = cronetEngine.newUrlRequestBuilder(
+                "https://db.ygoprodeck.com/api/v7/cardinfo.php", new MyUrlCallbackRequest(), executor);
+
+        org.chromium.net.UrlRequest request = urlRequestBuilder
+                .setHttpMethod("GET")
+                .build();
+
+        request.start();
 
     }
 
@@ -129,4 +147,5 @@ public class MainActivity extends AppCompatActivity{
             }
         }, ContextCompat.getMainExecutor(this));
     }
+
 }
