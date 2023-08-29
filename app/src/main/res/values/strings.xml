@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">TestTextRecognitionCamera</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="textview">TextView</string>
+    <string name="decoded_text">Decoded Text</string>
+    <string name="informations">Informations</string>
+    <string name="nom_de_l_extension">Nom de l\'extension :</string>
+    <string name="sname">sName</string>
+    <string name="raret">Rareté :</string>
+    <string name="srarity">sRarity</string>
+    <string name="sraritycode">sRarityCode</string>
+    <string name="prix">Prix :</string>
+    <string name="aprice">aPrice</string>
+    <string name="cardname">cardName</string>
+    <string name="cardcode">cardCode</string>
+    <string name="card_image">Card image</string>
+    <string name="close_button">close_button</string>
 </resources>

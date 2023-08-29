@@ -26,6 +26,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -47,5 +50,5 @@ dependencies {
     implementation("androidx.camera:camera-extensions:1.2.3")
 
     //Request HTTP
-    implementation("com.google.android.gms:play-services-cronet:18.0.1")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 }
