@@ -42,21 +42,18 @@ public class ResultFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ResultViewModel viewModel = new ViewModelProvider(requireActivity()).get(ResultViewModel.class);
-        viewModel.returnCardJson().observe(requireActivity(), json -> {
-            try {
-                binding.cardName.setText(json.getString("name"));
-                binding.cardCode.setText(json.getString("id"));
-                binding.setPrice.setText(String.format("%s€", json.getJSONObject("card_sets").getString("set_price")));
-                binding.setName.setText(json.getJSONObject("card_sets").getString("set_name"));
-                binding.setRarity.setText(json.getJSONObject("card_sets").getString("set_rarity"));
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+        viewModel.returnCardJson().observe(requireActivity(), cardMutable -> {
+            binding.cardName.setText(cardMutable.getName());
+            binding.cardCode.setText(cardMutable.getId());
+            binding.setPrice.setText(String.format("%s€", cardMutable.getCardSet().getSetPrice()));
+            binding.setName.setText(cardMutable.getCardSet().getSetName());
+            binding.setRarity.setText(cardMutable.getCardSet().getSetRarity());
         });
 
         binding.returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                viewModel.setCardFindState(false);
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                 transaction.remove(ResultFragment.this);
                 transaction.commit();

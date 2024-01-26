@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
@@ -14,7 +15,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.media.Image;
@@ -43,7 +43,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 
 import okhttp3.Call;
@@ -54,12 +54,13 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity{
 
-    OkHttpClient client;
-    String url = "https://apiyugiho.fallforrising.com/api_ygh/API.php";
-    JSONObject jsonDataCard;
-    JSONArray dataFromJson;
+
+    JSONArray jsonArrayAllSets;
     private ActivityMainBinding binding;
+
     private ResultViewModel viewModel;
+    private FragmentManager fragmentManager = getSupportFragmentManager();
+
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
         public void onActivityResult(Boolean result) {
@@ -78,15 +79,14 @@ public class MainActivity extends AppCompatActivity{
         View view = binding.getRoot();
         setContentView(view);
 
-        client = new OkHttpClient();
 
-        getRequest();
+        RequestGetAllSets();
 
         imageAnalyzer();
 
     }
 
-    private void imageAnalyzer() {
+     private void imageAnalyzer() {
 
         ListenableFuture<ProcessCameraProvider> listenableFuture = ProcessCameraProvider.getInstance(this);
 
@@ -113,43 +113,64 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     @ExperimentalGetImage
                     public void analyze(@NonNull ImageProxy imageProxy) {
-
                         int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
                         if(imageProxy.getImage() == null) {
                             return;
                         }
                         Image image = imageProxy.getImage();
+
                         InputImage inputImage = InputImage.fromMediaImage(image, rotationDegrees);
 
                         TextRecognizer textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-
-                        Task<Text> result = textRecognizer.process(inputImage)
-                                .addOnSuccessListener(new OnSuccessListener<Text>() {
-                                    @Override
-                                    public void onSuccess(Text text) {
-                                        String finalText = text.getText();
-                                        try {
-                                            getCardInfos(finalText);
-                                        } catch (ExecutionException | InterruptedException |
-                                                 JSONException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    }
-                                })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.e("Error",e.toString());
+                        if(!viewModel.getCardFindState()) {
+//                            Log.v("stateCardFind", viewModel.getCardFindState().toString());
+                            Task<Text> result = textRecognizer.process(inputImage)
+                                    .addOnSuccessListener(new OnSuccessListener<Text>() {
+                                        @Override
+                                        public void onSuccess(Text text) {
+                                            viewModel.setCardFindState(true);
+                                            String finalText = "";
+                                            outerLoop: for (Text.TextBlock block : text.getTextBlocks()) {
+                                                for (Text.Line line : block.getLines()) {
+                                                    for (Text.Element element : line.getElements()) {
+                                                        String elementText = element.getText();
+                                                        if(elementText.indexOf('-') != -1) {
+                                                            Log.v("codeFind", elementText);
+                                                            finalText = elementText;
+                                                            break outerLoop;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            try {
+                                                if(finalText != "") {
+                                                    CardInfoController.retrieveCard(finalText, jsonArrayAllSets, viewModel, fragmentManager);
+                                                } else {
+                                                    viewModel.setCardFindState(false);
+                                                }
+                                            } catch (JSONException ignored) {
+                                            } catch (ExecutionException e) {
+                                                throw new RuntimeException(e);
+                                            } catch (InterruptedException e) {
+                                                throw new RuntimeException(e);
                                             }
                                         }
-
-                                );
+                                    })
+                                    .addOnFailureListener(
+                                            new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                }
+                                            }
+                                    );
+                        };
                         imageProxy.close();
                     }
                 });
 
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis);
+                Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis);
+
+                camera.getCameraControl().setZoomRatio(2);
             }
             catch (ExecutionException | InterruptedException e) {
                 Log.e("myMessageError", e.toString());
@@ -159,22 +180,11 @@ public class MainActivity extends AppCompatActivity{
         }, ContextCompat.getMainExecutor(this));
     }
 
-    private void getCardInfos(String code) throws ExecutionException, InterruptedException, JSONException {
+    public void RequestGetAllSets() {
+        OkHttpClient client = new OkHttpClient();
+        String sets_api_url = "https://apiyugiho.fallforrising.com/api_ygh/set_api.php";
 
-        int i = 0;
-        while(i < dataFromJson.length()) {
-            JSONObject cardObject = dataFromJson.getJSONObject(i);
-            if (code.equals(cardObject.getString("id"))) {
-                viewModel.cardJson(cardObject);
-                returnInformation();
-                break;
-            }
-            i++;
-        }
-    }
-
-    public void getRequest() {
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder().url(sets_api_url).build();
         client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -188,8 +198,8 @@ public class MainActivity extends AppCompatActivity{
                         public void run() {
                             try {
                                 if (response.body() != null) {
-                                    jsonDataCard = new JSONObject(response.body().string());
-                                    dataFromJson = jsonDataCard.getJSONArray("data");
+                                    JSONObject jsonObjectAllSets = new JSONObject(response.body().string());
+                                    jsonArrayAllSets = jsonObjectAllSets.getJSONArray("data");
                                     System.out.println("Retriving data finish");
                                 }
                             } catch (IOException | JSONException e) {
@@ -201,11 +211,4 @@ public class MainActivity extends AppCompatActivity{
             });
     }
 
-    public void returnInformation() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        ResultFragment resultFragment = ResultFragment.newInstance();
-        fragmentTransaction.add(R.id.fragment_container_view, resultFragment);
-        fragmentTransaction.commit();
-    }
 }
