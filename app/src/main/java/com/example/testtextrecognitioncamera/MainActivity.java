@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity{
 
         LifecycleOwner lifecycleOwner = this;
 
-        TextRecognition textRecognition = new TextRecognition(this, binding, viewModel, lifecycleOwner, cardInfoController);
+        GetCodeFromCamera textRecognition = new GetCodeFromCamera(this, binding, viewModel, lifecycleOwner, cardInfoController);
         cardInfoController.startCameraAndAnalyze(textRecognition);
     }
 }
