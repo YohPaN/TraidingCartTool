@@ -16,7 +16,7 @@ public class ResultViewModel extends ViewModel {
     }
 
     public void setCardFindState(Boolean state) {
-        Log.v("stateCardFind", state.toString());
+        Log.v(this.getClass().getName(), state.toString());
         cardFindState = state;
     }
 
