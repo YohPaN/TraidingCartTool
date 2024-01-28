@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 
 import com.example.testtextrecognitioncamera.databinding.FragmentResultBinding;
 
-import org.json.JSONException;
 
 public class ResultFragment extends Fragment {
 
@@ -24,12 +23,6 @@ public class ResultFragment extends Fragment {
         return new ResultFragment();
     }
 
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -50,14 +43,11 @@ public class ResultFragment extends Fragment {
             binding.setRarity.setText(cardMutable.getCardSet().getSetRarity());
         });
 
-        binding.returnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewModel.setCardFindState(false);
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.remove(ResultFragment.this);
-                transaction.commit();
-            }
+        binding.returnButton.setOnClickListener(closeButton -> {
+            viewModel.setCardFindState(false);
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.remove(ResultFragment.this);
+            transaction.commit();
         });
     }
 }

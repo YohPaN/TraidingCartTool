@@ -38,7 +38,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.json:json:20220924")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    implementation("org.mockito:mockito-core:3.+")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     ////ML KIT text recognition

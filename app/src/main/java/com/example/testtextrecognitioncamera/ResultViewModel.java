@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import org.json.JSONObject;
 
 public class ResultViewModel extends ViewModel {
     private final MutableLiveData<Card> cardMutable = new MutableLiveData<>();

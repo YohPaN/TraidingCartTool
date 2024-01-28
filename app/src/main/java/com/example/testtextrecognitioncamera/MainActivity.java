@@ -14,7 +14,6 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.media.Image;
@@ -37,29 +36,22 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 
 import java.util.concurrent.*;
 
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity{
 
 
-    JSONArray jsonArrayAllSets;
     private ActivityMainBinding binding;
 
     private ResultViewModel viewModel;
     private FragmentManager fragmentManager = getSupportFragmentManager();
+    private AllCardSets allCardSets;
+    private final OkHttpClient client = new OkHttpClient();
 
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
@@ -79,9 +71,12 @@ public class MainActivity extends AppCompatActivity{
         View view = binding.getRoot();
         setContentView(view);
 
-
-        RequestGetAllSets();
-
+        allCardSets = new AllCardSets(client);
+        try {
+            allCardSets.requestGetAllSets();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         imageAnalyzer();
 
     }
@@ -144,14 +139,12 @@ public class MainActivity extends AppCompatActivity{
                                             }
                                             try {
                                                 if(finalText != "") {
-                                                    CardInfoController.retrieveCard(finalText, jsonArrayAllSets, viewModel, fragmentManager);
+                                                    CardInfoController.retrieveCard(finalText, viewModel, fragmentManager, allCardSets, client);
                                                 } else {
                                                     viewModel.setCardFindState(false);
                                                 }
                                             } catch (JSONException ignored) {
-                                            } catch (ExecutionException e) {
-                                                throw new RuntimeException(e);
-                                            } catch (InterruptedException e) {
+                                            } catch (ExecutionException | InterruptedException e) {
                                                 throw new RuntimeException(e);
                                             }
                                         }
@@ -179,36 +172,4 @@ public class MainActivity extends AppCompatActivity{
             }
         }, ContextCompat.getMainExecutor(this));
     }
-
-    public void RequestGetAllSets() {
-        OkHttpClient client = new OkHttpClient();
-        String sets_api_url = "https://apiyugiho.fallforrising.com/api_ygh/set_api.php";
-
-        Request request = new Request.Builder().url(sets_api_url).build();
-        client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    e.printStackTrace();
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                if (response.body() != null) {
-                                    JSONObject jsonObjectAllSets = new JSONObject(response.body().string());
-                                    jsonArrayAllSets = jsonObjectAllSets.getJSONArray("data");
-                                    System.out.println("Retriving data finish");
-                                }
-                            } catch (IOException | JSONException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    });
-                }
-            });
-    }
-
 }
