@@ -1,0 +1,18 @@
+
+ž
+java:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(–¯¸ì8 Þ²§Ö1
+ž
+java:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(¸ê ©8 Þ²§Ö1
+£
+java:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(õ²÷üüÿÿÿÿ8¡Þ²§Ö1
+j	java:S100!"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ø“öÕ8¤Þ²§Ö1
+W
+java:S18542":Remove this useless assignment to local variable "bottom".(ž¤ƒÙ8Ã¿³§Ö1
+V
+java:S18541"9Remove this useless assignment to local variable "right".(´áˆš8÷š³§Ö1
+]	java:S125)"<This block of commented-out lines of code should be removed.(¢¥šüþÿÿÿÿ8¾´Ç§Ö1
+G
+java:S14811"*Remove this unused "right" local variable.(´áˆš8øš³§Ö1
+H
+java:S14812"+Remove this unused "bottom" local variable.(ž¤ƒÙ8Ä¿³§Ö1
+]	java:S1253"<This block of commented-out lines of code should be removed.(Ú¦‡òýÿÿÿÿ8¥Þ²§Ö1
